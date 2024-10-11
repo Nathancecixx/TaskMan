@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <stdlib.h>
+#include <dirent.h>
+#include <ctype.h>
 #include <time.h>
 #include <stdbool.h>
 
@@ -15,11 +17,8 @@
 #define MIN_REFRESH_TIME_MS 50.0f
 #define MAX_REFRESH_TIME_MS 100.0f
 
+#define PROC_LS_CHUNK 20
 
-typedef struct {
-  int id;
-  char* name;
-} PROCESS;
 
 typedef struct {
   
@@ -53,13 +52,30 @@ typedef struct {
     char* swapMemUsage;
 } MEM_INFO;
 
+typedef struct {
+  int id;
+  char name[255];
+} PROCESS_INFO;
+
+typedef struct {
+  PROCESS_INFO* list;
+  int currentSize;
+  int maxCapacity;
+} PROCESS_LIST;
+
+
+
 int InitCpuInfo(CPU_INFO* info);
-
-//int LoadProcInfo(PROCESS_MANAGER* pm);
-
 int LoadCpuInfo(CPU_INFO* info);
 
 //int LoadMemInfo(PROCESS_MANAGER* pm);
+
+int InitProcLs(PROCESS_LIST* pl);
+int LoadProcLs(PROCESS_LIST* pl);
+int AddProcessLs(PROCESS_LIST* pl, PROCESS_INFO info);
+int ClearProcLs(PROCESS_LIST* pl);
+int PrintProcessLs(PROCESS_LIST* pl);
+
 
 
 #endif // PROCESS_MANAGER_H

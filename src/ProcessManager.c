@@ -54,7 +54,7 @@ int LoadCpuInfo(CPU_INFO* info){
       }
       char user[20], nice[20], system[20], idle[20], ioWait[20], irq[20], softIrq[20], steal[20];
       sscanf(line1, "%*s %s %s %s %s %s %s %s %s", user, nice, system, idle, ioWait, irq, softIrq, steal);
-      
+        
         strcpy(info->cores1[info->coreCount], line1);
         info->coreCount++;
     }
@@ -107,11 +107,91 @@ int LoadCpuInfo(CPU_INFO* info){
     } else if (strcmp(label, "procs_blocked") == 0) {
       sscanf(line, "%*s %d", &info->processBlocked);
     }
-      
-  }
+  }      
+  
 
   info->success = true;
 
   fclose(file);
+  return 0;
+}
+
+
+
+
+int PrintProcLs(PROCESS_LIST* pl){
+  for(int i = 0; i < pl->currentSize; i++){
+    printf("Process ID: %d - Name: %s\n", pl->list[i].id, pl->list[i].name);
+  }
+  return 0;
+}
+
+
+
+
+int InitProcLs(PROCESS_LIST* pl) {
+  pl->currentSize = 0;
+  pl->maxCapacity = PROC_LS_CHUNK;
+
+  pl->list = (PROCESS_LIST*) malloc(sizeof(PROCESS_INFO) * PROC_LS_CHUNK);
+
+  if(pl->list == NULL){
+    perror("Failed to malloc process list.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+int LoadProcLs(PROCESS_LIST* pl) {
+  DIR* dir = opendir("/proc");
+  struct dirent* entry;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (isdigit(*entry->d_name)) {
+      // We found a process directory, now read relevant information
+      int pid = atoi(entry->d_name);
+      char proc_name[256];
+      snprintf(proc_name, sizeof(proc_name), "/proc/%d/status", pid);
+
+      FILE* file = fopen(proc_name, "r");
+      if (file == NULL) {
+        continue;
+      }
+
+      PROCESS_INFO p;
+      p.id = pid;
+
+      fscanf(file, "Name: %s", p.name);
+
+      fclose(file);
+
+      AddProcessLs(pl, p);
+    }
+  }
+
+  return 0;
+}
+
+int AddProcessLs(PROCESS_LIST* pl, PROCESS_INFO info){
+  pl->currentSize ++;
+ //Check if list is big enough
+ if(pl->currentSize >= pl->maxCapacity){
+   pl->maxCapacity += PROC_LS_CHUNK;
+   pl->list = realloc(pl->list, sizeof(PROCESS_INFO) * pl->maxCapacity);
+   if(pl->list == NULL) {
+     perror("Failed to realloc process list\n");
+     return 1;
+   }
+ }
+ int position = pl->currentSize-1;
+
+ pl->list[position] = info;
+
+ return 0;
+}
+
+int ClearProcLs(PROCESS_LIST* pl){
+  free(pl->list);
   return 0;
 }

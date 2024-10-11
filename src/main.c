@@ -55,6 +55,7 @@ void* cpu_info_updater(void* arg) {
 
 
 int main(){
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TaskMan");
   SetTargetFPS(60);
 
@@ -66,6 +67,12 @@ int main(){
 
   CPU_INFO cpu_info = {0};
   cpu_info.refreshTime = 100000.0f;
+
+  PROCESS_LIST process_list = {0};
+  InitProcLs(&process_list);
+  LoadProcLs(&process_list);
+  PrintProcLs(&process_list);
+  ClearProcLs(&process_list);
 
   // Create the CPU info updating thread
   pthread_t updater_thread;
@@ -80,28 +87,33 @@ int main(){
 
     //DEBUG
     //printf("Refresh time: %f ms\n", cpu_info.refreshTime);
+
+    int WindowWidth = GetScreenWidth();
+    int WindowHeight = GetScreenHeight();
     
+
+
     BeginDrawing();
     
     Rectangle NavRec = {
       0, 
       0, 
-      WINDOW_WIDTH/4, 
-      WINDOW_HEIGHT
+      WindowWidth/4, 
+      WindowHeight
     };
     
     if(GetMouseX() < NavRec.width){
-      ViewRec.x = WINDOW_WIDTH/4; 
+      ViewRec.x = WindowWidth/4; 
       ViewRec.y = 0; 
-      ViewRec.width = WINDOW_WIDTH - (WINDOW_WIDTH/4); 
-      ViewRec.height = WINDOW_HEIGHT;
+      ViewRec.width = WindowWidth - (WindowWidth/4); 
+      ViewRec.height = WindowHeight;
 
       NavbarRender(NavRec, &CurrentView, &cpu_info);
     } else {  
       ViewRec.x = 0;
       ViewRec.y = 0;
-      ViewRec.width = WINDOW_WIDTH;
-      ViewRec.height = WINDOW_HEIGHT;
+      ViewRec.width = WindowWidth;
+      ViewRec.height = WindowHeight;
     }
 
     switch(CurrentView){
