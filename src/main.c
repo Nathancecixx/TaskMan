@@ -55,12 +55,11 @@ void* cpu_info_updater(void* arg) {
 
 
 int main(){
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TaskMan");
   SetTargetFPS(60);
 
 
-  GuiSetStyle(DEFAULT, TEXT_SIZE, 15);
+  GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
 
   VIEW CurrentView = PROCESS_VIEW; 
   Rectangle ViewRec;
@@ -71,8 +70,6 @@ int main(){
   PROCESS_LIST process_list = {0};
   InitProcLs(&process_list);
   LoadProcLs(&process_list);
-  PrintProcLs(&process_list);
-  ClearProcLs(&process_list);
 
   // Create the CPU info updating thread
   pthread_t updater_thread;
@@ -118,7 +115,7 @@ int main(){
 
     switch(CurrentView){
       case PROCESS_VIEW:{
-        ProcRender(ViewRec);
+        ProcRender(ViewRec, &process_list);
         break;
         }
       case CPU_VIEW: {
@@ -131,6 +128,8 @@ int main(){
   }
   
 
+  ClearProcLs(&process_list);
+  
   pthread_cancel(updater_thread);
   pthread_join(updater_thread, NULL);
   pthread_mutex_destroy(&cpu_info_mutex);

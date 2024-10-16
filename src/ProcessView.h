@@ -10,7 +10,7 @@
 
 //int UpdateProcView(PROCESS_MANAGER* pm);
 
-int ProcRender(Rectangle boundary);
+int ProcRender(Rectangle boundary, PROCESS_LIST* pl);
 
 int CpuRender(Rectangle bounds, CPU_INFO* info, pthread_mutex_t* mutex);
 //int DeInitProcVeiw();

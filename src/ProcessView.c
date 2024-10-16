@@ -4,12 +4,16 @@ int drawCoreHeatMap(Rectangle bounds, CPU_INFO* info);
 float calculateCoreUsageDelta(const char* coreDataOne, const char* coreDataTwo); 
 float calculateCoreUsageTotal(const char* coreDataOne, const char* coreDataTwo);
 
-int ProcRender(Rectangle bounds) {
+int scrollIndex = 0;  // Initial scroll position
+int activeItem = -1;   // Initially, no item is selected
+ 
+
+int ProcRender(Rectangle bounds, PROCESS_LIST* pl) {
   DrawRectangleRec(bounds, primaryBackground);
 
-    if (1) {
+    if (0) {
       const char *errorMessage = "Couldn't load processes";
-      int fontSize = 15;  // Set a font size for the labelVector2
+      int fontSize = 18;  // Set a font size for the labelVector2
       Vector2 textSize = MeasureTextEx(GetFontDefault(), errorMessage, fontSize, 1);
 
       // Calculate the centered position within the boundsfloat
@@ -21,8 +25,24 @@ int ProcRender(Rectangle bounds) {
       return 1;
     }
 
-  return 0;
+    // Variables to control scroll and active item
+  
+  if(pl->processNameList != NULL){
+    activeItem = GuiListView(
+            (Rectangle){ bounds.x + ((GetScreenWidth()-bounds.x)/4), 
+                        bounds.y + 50, 
+                        400, 
+                        200 },
+            (const char*)pl->processNameList, 
+            &scrollIndex,                     // Scroll index to control the scroll position
+            &activeItem                       // The active (selected) item
+        );
+
+
+  }
+    return 0;
 }
+
 
 int CpuRender(Rectangle bounds, CPU_INFO* locked_info, pthread_mutex_t* mutex){
   CPU_INFO info;
@@ -36,7 +56,7 @@ int CpuRender(Rectangle bounds, CPU_INFO* locked_info, pthread_mutex_t* mutex){
 
     if (!info.success) {
       const char *errorMessage = "Couldn't load cpu info";
-      int fontSize = 15;  // Set a font size for the labelVector2
+      int fontSize = 18;  // Set a font size for the labelVector2
       Vector2 textSize = MeasureTextEx(GetFontDefault(), errorMessage, fontSize, 1);
 
       // Calculate the centered position within the boundsfloat
@@ -61,17 +81,18 @@ int CpuRender(Rectangle bounds, CPU_INFO* locked_info, pthread_mutex_t* mutex){
     char contextSwitchingStr[32];
     snprintf(contextSwitchingStr, sizeof(contextSwitchingStr), "Context Switching: %d", info.contextSwitching);
 
+    int textSize = 18;
     //Get the rectangle and size of text needed to make gui label
-    Vector2 rp_size = MeasureTextEx(GetFontDefault(), runningProcessCountStr, 15, 1);
+    Vector2 rp_size = MeasureTextEx(GetFontDefault(), runningProcessCountStr, textSize, 1);
     Rectangle rp_rec = {bounds.x + 40, bounds.y + 40, rp_size.x, rp_size.y};
 
-    Vector2 tp_size = MeasureTextEx(GetFontDefault(), totalProcessCountStr, 15, 1);
+    Vector2 tp_size = MeasureTextEx(GetFontDefault(), totalProcessCountStr, textSize, 1);
     Rectangle tp_rec = {bounds.x + 40, bounds.y + 80, tp_size.x, tp_size.y};
 
-    Vector2 bp_size = MeasureTextEx(GetFontDefault(), blockedProcessCountStr, 15, 1);
+    Vector2 bp_size = MeasureTextEx(GetFontDefault(), blockedProcessCountStr, textSize, 1);
     Rectangle bp_rec = {bounds.x + 40, bounds.y + 120, bp_size.x, bp_size.y};
 
-    Vector2 cs_size = MeasureTextEx(GetFontDefault(), contextSwitchingStr, 15, 1);
+    Vector2 cs_size = MeasureTextEx(GetFontDefault(), contextSwitchingStr, textSize, 1);
     Rectangle cs_rec = {bounds.x + 40, bounds.y + 160, cs_size.x, cs_size.y};
 
 

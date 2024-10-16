@@ -134,11 +134,12 @@ int InitProcLs(PROCESS_LIST* pl) {
   pl->maxCapacity = PROC_LS_CHUNK;
 
   pl->list = (PROCESS_LIST*) malloc(sizeof(PROCESS_INFO) * PROC_LS_CHUNK);
-
   if(pl->list == NULL){
-    perror("Failed to malloc process list.\n");
+    printf("Failed to malloc process list");
     return 1;
   }
+
+  pl->processNameList = NULL;
 
   return 0;
 }
@@ -170,6 +171,31 @@ int LoadProcLs(PROCESS_LIST* pl) {
     }
   }
 
+  
+  int stringSize = 0;
+  for(int i = 0; i < pl->currentSize; i++){
+    stringSize += strlen(pl->list[i].name) + 50;
+  }
+
+  if(pl->processNameList != NULL){
+    free(pl->processNameList);
+  }
+
+  pl->processNameList = (char*) malloc(sizeof(char) * (stringSize + 1));
+  if(pl->processNameList == NULL){
+    printf("Failed to malloc list");
+    return 1;
+  }
+
+  pl->processNameList[0] = '\0';
+
+  for(int i = 0; i < pl->currentSize; i++){
+    strcat(pl->processNameList, pl->list[i].name);
+    strcat(pl->processNameList, ";");
+  }
+  //pl->processNameList[stringSize] = '\0';
+
+  printf("Formulated String: %s\n", pl->processNameList);
   return 0;
 }
 
@@ -193,5 +219,7 @@ int AddProcessLs(PROCESS_LIST* pl, PROCESS_INFO info){
 
 int ClearProcLs(PROCESS_LIST* pl){
   free(pl->list);
+
+  free(pl->processNameList);
   return 0;
 }

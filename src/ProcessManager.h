@@ -59,6 +59,7 @@ typedef struct {
 
 typedef struct {
   PROCESS_INFO* list;
+  char* processNameList;
   int currentSize;
   int maxCapacity;
 } PROCESS_LIST;
